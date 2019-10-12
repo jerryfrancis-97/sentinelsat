@@ -129,6 +129,7 @@ class CommaSeparatedString(click.ParamType):
 @click.option(
     "--footprints",
     is_flag=True,
+    type=click.Path(exists=True),
     help="""Create a geojson file search_footprints.geojson with footprints
     and metadata of the returned products.
     """,
@@ -221,7 +222,15 @@ def cli(
 
     if footprints is True:
         footprints_geojson = api.to_geojson(products)
-        with open(os.path.join(path, "search_footprints.geojson"), "w") as outfile:
+        if os.path.isdir(footprints):
+            foot_path = os.path.join(footprints, "search_footprints.geojson")
+        else:
+            foot_path = "search_footprints.geojson"
+        if path == ".":
+            dump_path = os.path.join(os.getcwd(), foot_path)
+        else:
+            dump_path = os.path.join(path, foot_path) 
+        with open(dump_path, "w") as outfile:
             outfile.write(gj.dumps(footprints_geojson))
 
     if download is True:
